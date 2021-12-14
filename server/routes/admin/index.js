@@ -14,7 +14,13 @@ module.exports = app => {
         // 8.发回客户端，让它知道我们创建完成了，以及创建的数据是什么
         res.send(model)
     })
-    app.use('/admin/api', router) // 4. 将子路由挂载到这个地方，不然每次写路由都要加上/admin/api很麻烦
+    // 1.再来一个分类列表，定义到categories 这里表示分类列表
+    router.get('/categories', async (req, res) => {
+        // 2.限制10条数据 当然不限制也可以，我们暂时先限制一下
+        const items = await Category.find().limit(10) 
+        res.send(items) //直接把数据发回给前端
+    })
+    app.use('/admin/api', router) 
 }
 
 // 9.这样我们的分类接口就定义好了，/admin/api/categories，下一步就是去前端发起接口请求。
