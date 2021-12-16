@@ -14,11 +14,23 @@ module.exports = app => {
         // 8.发回客户端，让它知道我们创建完成了，以及创建的数据是什么
         res.send(model)
     })
+    // 1.修改操作
+    router.put('/categories/:id', async (req, res) => {
+        // 2.根据id去找，找到后更新数据，req.body是内容
+        const model = await Category.findByIdAndUpdate(req.params.id, req.body)
+        res.send(model)
+    })
     // 1.再来一个分类列表，定义到categories 这里表示分类列表
     router.get('/categories', async (req, res) => {
         // 2.限制10条数据 当然不限制也可以，我们暂时先限制一下
         const items = await Category.find().limit(10) 
         res.send(items) //直接把数据发回给前端
+    })
+    // 1.获取详情页的分类接口
+    router.get('/categories/:id', async (req, res) => {
+        const model = await Category.findById(req.params.id)
+        // 2.返回model
+        res.send(model)
     })
     app.use('/admin/api', router) 
 }
