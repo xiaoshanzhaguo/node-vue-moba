@@ -20,6 +20,14 @@ module.exports = app => {
         const model = await Category.findByIdAndUpdate(req.params.id, req.body)
         res.send(model)
     })
+    // 1.删除操作
+    router.delete('/categories/:id', async (req, res) => {
+        // 2.删完之后，我们不需要获取它的返回值，只需要给客户端返回一个success: true
+        await Category.findByIdAndDelete(req.params.id, req.body)
+        res.send({
+            success: true
+        })
+    })
     // 1.再来一个分类列表，定义到categories 这里表示分类列表
     router.get('/categories', async (req, res) => {
         // 2.限制10条数据 当然不限制也可以，我们暂时先限制一下
