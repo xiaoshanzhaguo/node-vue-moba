@@ -31,7 +31,9 @@ module.exports = app => {
     // 1.再来一个分类列表，定义到categories 这里表示分类列表
     router.get('/categories', async (req, res) => {
         // 2.限制10条数据 当然不限制也可以，我们暂时先限制一下
-        const items = await Category.find().limit(10) 
+        // 【子分类】 populate里放关联的字段，我们可以通过这个字段把它查出来
+        // 我们要的parent并不是id,而是一个完整的信息，并把它变成对象
+        const items = await Category.find().populate('parent').limit(10) 
         res.send(items) //直接把数据发回给前端
     })
     // 1.获取详情页的分类接口
