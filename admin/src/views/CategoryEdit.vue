@@ -46,13 +46,13 @@ export default {
       if (this.id) {
         // 下面这是修改操作
         // eslint-disable-next-line
-        res = await this.$http.put(`categories/${this.id}`, this.model);
+        res = await this.$http.put(`rest/categories/${this.id}`, this.model);
       } else {
         // 下面这是新增操作
         // eslint-disable-next-line
-        res = await this.$http.post("categories", this.model);
+        res = await this.$http.post("/rest/categories", this.model);
       }
-      // 3.得到res后，创建完跳转到分类列表
+      // 3.得到res后，创建完跳转到分类列表 !!!注意下面是跳转，不用加rest
       this.$router.push("/categories/list");
       // 4.跳转的时候，还要提示一个message
       this.$message({
@@ -62,7 +62,7 @@ export default {
     },
     async fetch() {
       // 2. 去请求这个接口
-      const res = await this.$http.get(`categories/${this.id}`); // 这个接口暂时不知道，因此又要去后端写接口
+      const res = await this.$http.get(`rest/categories/${this.id}`); // 这个接口暂时不知道，因此又要去后端写接口
       this.model = res.data;
     },
     // 【子分类】 3. 获取父级的选项

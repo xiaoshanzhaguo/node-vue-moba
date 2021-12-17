@@ -32,7 +32,7 @@ export default {
     async fetch() {
       // 4.这里不知道分类接口是哪个，故进入服务端的index.js里面，把分类列表的接口写一下。
       // eslint-disable-next-line
-      const res = await this.$http.get("categories");
+      const res = await this.$http.get("rest/categories");
       // 5.
       this.items = res.data;
     },
@@ -47,7 +47,7 @@ export default {
         }).then(async () => {
             // 2.4 then里面表示的是它选择了一定要删除，在这里面定义一个res去请求接口
             // eslint-disable-next-line
-            const res = await this.$http.delete(`categories/${row._id}`)  //注意这里是下划线id，指定它去删除
+            const res = await this.$http.delete(`rest/categories/${row._id}`)  //注意这里是下划线id，指定它去删除
           this.$message({
             type: 'success',
             message: '删除成功!'
