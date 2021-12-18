@@ -1,5 +1,5 @@
 <template>
-  <div class="categoryList">
+  <div class="itemList">
     <h1>物品列表</h1>
     <!-- 1. 表格需要提供一个表格的数据 -->
     <el-table :data="items">
