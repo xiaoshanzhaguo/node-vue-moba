@@ -30,7 +30,7 @@ module.exports = app => {
     // 1.删除操作
     router.delete('/:id', async (req, res) => {
         // 2.删完之后，我们不需要获取它的返回值，只需要给客户端返回一个success: true
-        await req.Model.findByIdAndDelete(req.params.id, req.body)
+        await req.Model.findByIdAndDelete(req.params.id) // 这后面不用加req.body，因为我们只需要根据id查找
         res.send({
             success: true
         })

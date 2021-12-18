@@ -70,7 +70,7 @@ export default {
     // 【子分类】 因为数据是从后台接口过来，需要写一个接口，很明显在不考虑多的情况下，数据就是接口列表的数据
     //  当然也可以专门写一个接口用来显示父级的选项 xxx.get(`categories/parent-options`) 然后我们在后端定义一个路由即可
     // 但是现在比较简单的做法就是直接使用分类列表的接口
-      const res = await this.$http.get(`categories`);
+      const res = await this.$http.get(`rest/categories`);  //之前加接口地址，这里没填写对，没加rest
       this.parents = res.data;
     },
   },
