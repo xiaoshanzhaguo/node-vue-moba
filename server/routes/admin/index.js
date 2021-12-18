@@ -76,6 +76,27 @@ module.exports = app => {
         req.Model = require(`../../models/${modelName}`)  
         next()
     }, router) 
+
+    // 【图片上传】 2. 先定义一个multer，再定义一个上传中间件（定义好就可以在下面直接用），执行它，同时传递一个destination 目标地址
+    const multer = require('multer')
+    const upload = multer({dest:__dirname + '/../../uploads'}) //一定要加dirname，使用绝对地址（windows从c:，mac从/开始的地址）
+
+    // 【图片上传】 1. 在这里能获取到上传文件，但是express本身获取不到上传文件的数据，
+    // 因此我们要使用中间件来专门处理上传数据 npm i multer
+    // 【图片上传】3. 定义后直接使用upload，single表示上传单个文件，
+    // 字段名就是前面写的file（在接口里传了一个Form Data，名字叫file）
+    // 上面的file是可以改的，在el-upload里通过一个参数去配置，这样我们就可以允许接口去上传文件
+    app.post('/admin/api/upload',upload.single('file'), async (req, res) => {
+        // 接收到的文件在这里 简单的操作是把它return回去就可以了
+        // return res.file
+        // 本身在express里是没有req.file这个东西的，是因为我们用了upload、multer这个中间件，
+        // 它会向上面的代码里一样，在req里给我们加一个Model，而这里是把上传文件的数据赋值到req上，因此才有req.file
+
+        const file = req.file
+        // 【图片上传】4. 我们要给file拼出一个url 下面 file.url先写死，因为以后可能会是固定的地址(一定是服务的的地址)
+        file.url = `http://localhost:3000/uploads/${file.filename}`
+        res.send(file) 
+    })
 }
 
 // 9.这样我们的分类接口就定义好了，/admin/api/categories，下一步就是去前端发起接口请求。

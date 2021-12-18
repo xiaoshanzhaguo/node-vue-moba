@@ -9,6 +9,10 @@ app.use(require('cors')())
 // 8.加一个中间件
 app.use(express.json())
 
+// 【上传图片】 表示的是uploads路径下面的东西，都是静态文件，用express.static来托管它
+// 这就是托管静态文件，让我们uploads里的所有文件可以通过/uploads文件夹来访问。
+app.use('/uploads', express.static(__dirname + '/uploads'))
+
 // 5.引用 这样就能实现在admin里面使用app
 require('./routes/admin')(app)
 

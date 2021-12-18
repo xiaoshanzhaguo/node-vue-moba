@@ -4,7 +4,16 @@
     <!-- 1. 表格需要提供一个表格的数据 -->
     <el-table :data="items">
       <el-table-column prop="_id" label="ID" width="230"></el-table-column>
+      <!-- 【上传图片】1. -->
       <el-table-column prop="name" label="物品名称"></el-table-column>
+      <el-table-column prop="icon" label="图标">
+        <!-- 【上传图片】2. 在这里面用一个template 查看element-ui里有关table这块的内容，可以自定义这个字段里是怎么显示内容的-->
+        <template slot-scope="scope">
+          <!--【上传图片】3. 在这里面，想写什么写什么 -->
+          <!-- scope.row 表示这行数据  3rem表示3个字的高度-->
+          <img :src="scope.row.icon" alt="" style="height:3rem;">
+        </template>
+      </el-table-column>
       <el-table-column fixed="right" label="操作" width="180">
         <template slot-scope="scope">
           <el-button type="text" size="small" 
