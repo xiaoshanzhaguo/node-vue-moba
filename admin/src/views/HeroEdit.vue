@@ -147,11 +147,14 @@
               <el-form-item label="图标">
               <!-- 【技能编辑-UI】 2.8 这里的图标应该是当前添加技能的图标。
               model.skills表示的是技能的数组，这里面有icon等属性，因此为其他的输入框或上传修改v-model的值 -->
+
+              <!-- 【技能编辑】1. 修改图片上传后进行什么操作 
+              写一个函数接收一个res，要做的事情就是把res.url赋值到item.icon上。-->
                 <el-upload
               class="avatar-uploader"
               :action="$http.defaults.baseURL + '/upload'"
               :show-file-list="false"
-              :on-success="afterUpload"
+              :on-success="res => $set(item, 'icon', res.url)"
             >
               <img v-if="item.icon" :src="item.icon" class="avatar" />
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
@@ -162,6 +165,12 @@
               </el-form-item>
               <el-form-item label="小提示">
                 <el-input v-model="item.tips" type="textarea"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <!-- 下面的splice是针对数组进行切片，本意是在数组里把里面的部分删掉。 
+                第一个是指定要删除的位置（我们这里是在for循环里面的，因此就是i。）
+                从i这个位置开始，删除一个。-->
+                <el-button size="small" type="danger" @click="model.skills.splice(i, 1)">删除</el-button>
               </el-form-item>
             </el-col>
           </el-row>
@@ -293,14 +302,14 @@ export default {
 .avatar-uploader-icon {
   font-size: 28px;
   color: #8c939d;
-  width: 178px;
-  height: 178px;
-  line-height: 178px;
+  width: 5rem;
+  height: 5rem;
+  line-height: 5rem;
   text-align: center;
 }
 .avatar {
-  width: 178px;
-  height: 178px;
+  width: 5rem;
+  height: 5rem;
   display: block;
 }
 </style>
