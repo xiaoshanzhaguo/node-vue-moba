@@ -6,6 +6,7 @@
       <el-table-column prop="_id" label="ID" width="230"></el-table-column>
       <!-- 【上传图片】1. -->
       <el-table-column prop="name" label="英雄名称"></el-table-column>
+      <el-table-column prop="title" label="称号"></el-table-column>
       <el-table-column prop="avatar" label="图标">
         <!-- 【上传图片】2. 在这里面用一个template 查看element-ui里有关table这块的内容，可以自定义这个字段里是怎么显示内容的-->
         <template slot-scope="scope">
