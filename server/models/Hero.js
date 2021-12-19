@@ -12,6 +12,7 @@ const schema = new mongoose.Schema({
     title: { type: String },
     // 【英雄编辑-模型字段】英雄类型，需要和分类进行关联 ref里是指定它要关联的模型
     // category: {type: mongoose.Schema.Types.ObjectId, ref: 'Category'}
+    categories: [{type: mongoose.Schema.Types.ObjectId, ref: 'Category'}],
     // 评分
     scores: {
         difficult: { type: Number }, //难度
