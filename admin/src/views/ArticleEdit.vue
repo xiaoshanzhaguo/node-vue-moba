@@ -21,7 +21,9 @@
       <!-- 【文章管理】 3. 加上详情字段  -->
       <el-form-item label="详情">
         <!-- 【富文本编辑器】5. 使用它后，上面就换成vue-editor，并更改v-model的值 -->
-        <vue-editor v-model="model.body"></vue-editor>
+        <!-- 【富文本编辑器-图片上传】 1. -->
+        <vue-editor v-model="model.body" useCustomImageHandler
+       @image-added="handleImageAdded"></vue-editor>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" native-type="submit">保存</el-button>
@@ -101,6 +103,34 @@ export default {
       const res = await this.$http.get(`rest/categories`);  //之前加接口地址，这里没填写对，没加rest
       this.categories = res.data;
     },
+
+    // 【富文本编辑器-图片上传】 2. 我们用的是比较新的ES6语法，因此: function可以省略
+    // 在这里面可以看到它使用了接口请求，所以我们在外层，为了方便加async，在里面可以使用await，
+    // 把异步的请求写成同步的形式
+
+    // 【富文本编辑器-图片上传】 4. 这个就是我们自定义的上传器
+    async handleImageAdded(file, Editor, cursorLocation, resetUploader) {
+
+      // 一开始先定义一个表单数据 FormData是在html里自带的一个类，可以用来提交表单数据。
+      // 有两种方式提交数据：表单数据、json数据。平时我们用的是Json数据，但是因为这里要上传文件，故提交表单数据。
+      const formData = new FormData();
+      // appen是添加什么字段，file是选择的文件对象，我们在这里只需要改变上传的文件字段是哪个。
+      // 我们之前做图片上传时，查看返回的数据时，名称就是file，值是binary二进制文件
+      // 因为在服务端接收的也是file。（index.js里）
+      formData.append("file", file);
+
+      // 【富文本编辑器-图片上传】 3.
+      // 一个axios发起的请求，我们还是用自带的http发起请求。请求方法是post，上传地址是upload，formData是上传的数据，
+      // 它会返回一个结果，比如说res = xxx 请求它 我们把它改造成一行的写法。
+      // 原本我们是要写下面的axios这么多内容，改造后只要写一行数据，得到了res，就是下面的result。
+      // 得到了res后，我们知道res.data.url表示文件的一个url，所以有了下面的代码。
+      const res = await this.$http.post('upload', formData)
+      // 虽然现在还不知道它的意思，但是看它的样子就是拿到url之后，就用insertEmbed。Editor是个编辑器对象。
+      // 大致意思是插入一个元素，cursorLocation是光标的位置。光标位置插入一张图片，图片地址是res.data.url
+      Editor.insertEmbed(cursorLocation, "image", res.data.url);
+       // 重置上传器（上传文件的东西）
+      resetUploader();
+    }
   },
   created() {
     // 【子分类】 4. 在创建的时候，执行获取父级选项
