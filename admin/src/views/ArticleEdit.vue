@@ -20,7 +20,8 @@
       </el-form-item>
       <!-- 【文章管理】 3. 加上详情字段  -->
       <el-form-item label="详情">
-        <el-input v-model="model.body"></el-input>
+        <!-- 【富文本编辑器】5. 使用它后，上面就换成vue-editor，并更改v-model的值 -->
+        <vue-editor v-model="model.body"></vue-editor>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" native-type="submit">保存</el-button>
@@ -30,9 +31,22 @@
 </template>
 
 <script>
+// 【富文本编辑器】1.这里是import解构的写法，如果不这么写，我们习惯性的可能就是下面第二种写法
+// 【富文本编辑器】3.
+// 而我们直接获取里面导出的子对象的话，那就是用解构的方式获取里面的VueEditor
+import { VueEditor } from "vue2-editor"; 
+
+// 【富文本编辑器】2.
+// import a from 'vue2-editor'  a表示整个对象
+// a.VueEditor  我们需要去获取a里面的VueEditor
+
 export default {
   props: {
     id: {}, // 这里type:string不用去写
+  },
+  // 【富文本编辑器】4. 拿到之后把它加到components里面去。在这里加一个子组件，去使用VueEditor
+  components: {
+    VueEditor
   },
   data() {
     return {
