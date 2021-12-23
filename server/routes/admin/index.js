@@ -97,6 +97,44 @@ module.exports = app => {
         file.url = `http://localhost:3000/uploads/${file.filename}`
         res.send(file) 
     })
+
+    // 【登录接口】 1. 写登录路由  
+    app.post('/admin/api/login', async (req, res) => {
+        // 2. 我们应该是在前端把用户名和密码传过来，然后在这里校验，最终得到一些数据，看看是否成功。
+        // 返回前端一个token，一串密钥，让它去保存这个密钥。后续通过这个密钥去证明自己是哪个用户。
+        // res.send('ok') // 先让接口能调通
+
+        // 3. 到了服务器这边，无非是把数据接收过来，然后在数据库进行查找。
+        // 首先定义一个解构赋值 req.body就表示客户端传过来的所有数据(一个对象，有username，有password)
+        // 我们把里面的username和password分别解构出来。这样操作比较简单，
+        // 否则你就定义一个data = req.body，username = data.username。因为解构赋值比较简单一点，直接取对象里的username和password。
+        const { username, password } = req.body
+        
+        // 4. 拿到这两个东西后，我们应该想如何去操作。
+        // 一定要分清楚，我们没办法通过用户名和密码直接去找用户，只能根据用户名去找，因为密码被散列，被加密了，已经被换成密文了。
+        // 所以通过明文的123456找密文是找不到的，而且如果你把明文的123456用brcypt散列一下，再去查找，也是找不到的，
+        // 因为每一次的散列都会生成新的hash。因此我们只能一步步来，先通过username找到这个用户。
+
+        // 4.1 根据用户名找用户
+        // 那我们需要用到用户的模型，把用户的模型引用进来
+        const AdminUser = require('../../models/AdminUser')
+        // 下面是username: username键值对简写的方式，它们两正好一致，我们就可以写成简写方式。
+        const user = await AdminUser.findOne({ username })
+        
+        if (!user) {
+            // 设置状态码，并发送一段数据。平时我们是直接res.send发送，下面的写法表示的是适龄状态码再发送，
+            // 这样客户端至少知道不是正常的200，不是一个普通正常的请求。（这里去查看network，发现状态码422，返回用户名不存在）
+            return res.status(422).send({
+                message: '用户不存在'
+                // 有了这个消息，前端就能把它显示出来（去http里全局捕获）
+            })
+        }
+
+        // 如果用户存在，就去校验密码；如果不存在，就抛出异常来。
+        // 4.2 校验密码
+
+        // 4.3 返回token
+    })
 }
 
 // 9.这样我们的分类接口就定义好了，/admin/api/categories，下一步就是去前端发起接口请求。

@@ -31,11 +31,18 @@ export default {
       model: {}
     }
   },
-  method: {
+  methods: {
     // 【登录界面】7. login方法  当我们点击登录后，需要请求一个接口
-    login() {
+    async login() {
       // 这里先把this.model log出来看一下。
-      console.log(this.model);  //在页面中测试，console里发现，拿到了数据
+      // console.log(this.model);  //在页面中测试，console里发现，拿到了数据
+
+      // 【登录接口】 1. 请求这个数据完成，得到的应该是个token。后续我们会把token保存起来
+      // 3. post请求还要把当前的model传上去，因为里面包含了用户名和密码，因此把this.model当成第二个参数传给服务器。
+      // 然后到接口请求下面，就能看到username和password两个数据传上来了。并且这里传的密码是明文。
+      const res = await this.$http.post('login', this.model)
+      // 2. 暂时还是输出一下res.data。把服务端返回的数据log看一下。
+      console.log(res.data);
     }
   }
 }

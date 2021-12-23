@@ -26,4 +26,4 @@ const schema = new mongoose.Schema({
 })
 
 // 导出mongoose.model (弹幕：实例这个category并导出)
-module.exports = mongoose.model('Adminuser', schema)
+module.exports = mongoose.model('AdminUser', schema)
