@@ -119,7 +119,7 @@ module.exports = app => {
         // 那我们需要用到用户的模型，把用户的模型引用进来
         const AdminUser = require('../../models/AdminUser')
         // 下面是username: username键值对简写的方式，它们两正好一致，我们就可以写成简写方式。
-        const user = await AdminUser.findOne({ username })
+        const user = await AdminUser.findOne({username}).select('+password') //这里加上select的意思是把password取出来，因为默认是不取它的，我们要用加号，要取它
         
         if (!user) {
             // 设置状态码，并发送一段数据。平时我们是直接res.send发送，下面的写法表示的是适龄状态码再发送，
@@ -130,10 +130,43 @@ module.exports = app => {
             })
         }
 
-        // 如果用户存在，就去校验密码；如果不存在，就抛出异常来。
         // 4.2 校验密码
+        // 如果用户存在，就去校验密码；如果不存在，就抛出异常来。
+        // 引入bcrypt加密密码的模块  compareSync比较明文和密文是否匹配
+        const isValid = require('bcryptjs').compareSync(password, user.password) //因此之前在模型里设置了select: false，因此默认是取不到值的。
+        if (!isValid) {
+            // 统一422表示客户端提交的数据有问题，验证错误，当然你也可以用400或者别的，只不过老师习惯用422。在resForm规范里，也有建议用422的
+            return res.status(422).send({
+                message: '密码错误'
+            })
+        }
+        
 
         // 4.3 返回token
+        // 返回token，我们需要用到一个jsonwebtoken，在服务端里进行安装。这个是现在比较流行的，做web token验证的
+        const jwt = require('jsonwebtoken')
+        // 用sign(签名)来生成一个token。接收参数，第一个payload——你要放到token里的数据
+        // （这个token不是简单的随机字符串，它是把一个数据拿来进行散列，最后生成一个字符串拿去给客户端使用）
+        // 这里用一个对象比较好一点，我们只要保存用户的唯一id就够了，或者把用户的个人信息也保存进去，比如用户名是什么
+        const token = jwt.sign({
+            id: user._id,
+            // _id: user._id,
+            // // 不过大多数情况下，我们并不需要用户名，因为用户的用户名一般都是拿到id后自己把它获取出来的。
+            // // 只是说在jwt.sign里面可以加任何类型的数据。
+            // username: user.username  我们这里为了简单只放一个数据
+        },
+            // 它还有第二个参数，很重要，secret是个密钥，这个表示在生成token的时候，我们给它一个密钥。
+            // 给了这个密钥之后，它就会根据一定的算法去生成token，生成完后，客户端是可以不需要密钥把数据解出来，
+            // 但是一旦要验证是否正确（是否被客户端篡改过），我们就必要用另外一个成对的方法jwt.sign对应的jwt.verify去校验
+            // 所以这就需要服务端给一个密钥，哪怕客户端篡改了这个信息，那服务端也能识别出来这个是无效的
+            // 这个密钥随便给它一个字符串就可以。但是不能直接写在这里，它应该是一个全局的东西，所以下面涉及到给全局加一个属性（index.js）
+
+            // !!!!  这里要看根目录下的index.js
+            app.get('secret') // 这个get只能获取一个参数，它与我们定义路由的get名字其实是冲突的，所以这里通过参数名来区别，你是在定义路由还是配置。
+        )
+        res.send({ token })
+        // 当然这里还可以返回用户名，客户端就可以提示一下（这里老师直接在console里输出了token）
+        // 5. 然后去前端把token保存下来
     })
 }
 

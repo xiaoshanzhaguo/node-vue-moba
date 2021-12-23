@@ -11,7 +11,7 @@ const http = axios.create({
 http.interceptors.response.use(res => {
     // 2. res做一件事情
     return res
-}), err => {
+}, err => {
     // 3. 如果报错了，err就是做另外一件事情。错误的请求，不是200状态码，>=400它都会进入err这里
     // console.log(err.name); // 看一下err.name是什么
     // console.log(err.response);  // err的错误对象上有个返回对象 响应对象
@@ -32,8 +32,9 @@ http.interceptors.response.use(res => {
             message: err.response.data.message
         })
     }
+    
     return Promise.reject(err)
-}
+})
 
 //导出变量
 export default http

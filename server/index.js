@@ -4,6 +4,11 @@ const express = require("express")
 // 2.定义一个app，是express的实例
 const app = express()
 
+// 【接口登录】 加一个全局的属性，我们可以给app加一个东西
+// app.set表示在当前的express实例上面设置一个变量。第二个值应该放在环境变量里，不应该保存在代码里。
+// 但是我们是为了简单得教学，因此放在这里简单一点
+app.set('secret', 'fasfafdu89')
+
 // 7.加一个跨域模块
 app.use(require('cors')())
 // 8.加一个中间件

@@ -42,7 +42,21 @@ export default {
       // 然后到接口请求下面，就能看到username和password两个数据传上来了。并且这里传的密码是明文。
       const res = await this.$http.post('login', this.model)
       // 2. 暂时还是输出一下res.data。把服务端返回的数据log看一下。
-      console.log(res.data);
+      // console.log(res.data);
+
+      // 4. 下面是最简单的方法。这就表示把当前返回数据的token写入到localStorage里，是浏览器的一个存储，
+      // 在浏览器关闭之后，还能继续访问得到，下次再打开它也有的，只要保证是同一个网址域名就行
+      localStorage.token = res.data.token
+      // 如果希望浏览器关闭就没有的话，用sessionStorage。它表示的是当前浏览器关掉之后就没了
+      // sessionStorage.token = res.data.token
+
+      // 5. 设置完之后，跳转到首页
+      this.$router.push('/')
+      // 6. 最好用一个this的message去弹出一个信息，登录成功
+      this.$message({
+        type: 'success',
+        message: '登录成功'
+      })
     }
   }
 }
