@@ -1,13 +1,22 @@
+const AdminUser = require('../../models/AdminUser')
+
 // 1. 导出一个函数，这个函数接收一个对象app
 module.exports = app => {
     // 2. 在这个对象里面就可以用最外层的app
 
     const express = require('express')
+
+    const jwt = require('jsonwebtoken') // 【服务端校验密码(jwt)】 放到前面去引用
+
+    const AdminUser = require('../../models/AdminUser') // 暂时把AdminUser放到最顶上去
+
     // 3. 这里是express的一个子路由，当我们需要子路由的时候，就用它。
     const router = express.Router({
         // 通用接口 2.
         mergeParams: true
     })
+    
+    // 创建资源
     // 6. 
     // const req.Model = require('../../models/req.Model')
     router.post('/', async (req, res) => {
@@ -21,12 +30,16 @@ module.exports = app => {
         // 8.发回客户端，让它知道我们创建完成了，以及创建的数据是什么
         res.send(model)
     })
+
+    // 更新资源
     // 1.修改操作
     router.put('/:id', async (req, res) => {
         // 2.根据id去找，找到后更新数据，req.body是内容
         const model = await req.Model.findByIdAndUpdate(req.params.id, req.body)
         res.send(model)
     })
+
+    // 删除资源
     // 1.删除操作
     router.delete('/:id', async (req, res) => {
         // 2.删完之后，我们不需要获取它的返回值，只需要给客户端返回一个success: true
@@ -35,8 +48,56 @@ module.exports = app => {
             success: true
         })
     })
+
+    // 资源列表
     // 1.再来一个分类列表，定义到categories 这里表示分类列表
-    router.get('/', async (req, res) => {
+
+    // 【服务端登录校验jwt】 1. 我们现在需要改资源列表接口，甚至是每一个接口都需要改，那我们需要在这里加一个什么东西的话，
+    // 原本它显示列表的逻辑是不变的，请求这个/，我们路径是/rest/items，请求这个接口的时候，要显示这些列表，这些内容不变
+    // 我们仅仅是在显示列表之前加一个前置的处理就函数——也就是中间件（在async function前面加一个）
+    // 就跟我们下面处理资源一样，在路径和挂载router中间又加了一个函数，这就是在express里很重要的一个概念——中间件。
+    // 你可以在任意的处理函数之前，中间插入一个async function，只要它的格式是接收三个参数,req,res,next在里面，
+    // 同时在里面会调用next()，就表示它会继续处理后面的东西。资源列表这里也是这样。
+    router.get('/', async (req, res, next) => {
+        // 中间件，中间的处理程序(记住要加一个next，然后在里面调用next)
+
+        // 【服务端登录校验jwt】 2. 在这里做的是校验用户是否登录。首先要获取用户的信息（一般在请求头里去传 Request Headers）
+        // 先去前端进行处理（http.js）
+        // 后端来先获取这个东西
+        // 因为它是个标准请求头，所以在服务端也有对应的authorization来获取它
+        // （这里获取请求头全部是用小写，前端标准是用大写，但是后端全部都是用小写来获取，它们俩会被自动对应）
+        // const token = req.headers.authorization 
+        
+        // 【服务端登录校验jwt】 3. 获取之后，看一下获取到的token是什么
+        // console.log(token); // 刷新后台页面后，服务端就会输出token。
+        
+        // 【服务端登录校验jwt】 4. 需要获取token，先用String转一下。当然它也可能是个空值，后面再加一个或'',
+        // 这样子，无论怎么样，哪怕它没有，最后处理出来也是空的字符串。并用空格来分割。
+        const token = String(req.headers.authorization || '').split(' ').pop() //分割以后变成数组，pop()表示提取最后一个元素
+
+        // 【服务端登录校验jwt】 5.有了token之后，下一步就是提取数据
+        // jwt的decode表示把它解密出来，但是decode不会验证对错，所以不安全，我们用verify校验
+        // const tokenData = jwt.verify(token, app.get('secret')) // 这个secret是我们之前写的secret,保证跟最下面的是同一个secret就可以
+        // 【服务端登录校验jwt】 7.用解构赋值把里面的id获取出来
+        const { id } = jwt.verify(token, app.get('secret')) // 这个secret是我们之前写的secret,保证跟最下面的是同一个secret就可以
+
+        // 【服务端登录校验jwt】 6.拿到数据后，我们看看tokenData是啥 
+        // 下面的id为登录时的用户id（管理员列表里的id）因此我们可以用 用户id生成token，最终也可以通过token解析出来一个id。
+        // 我们之前用什么来加密的，最终也能解析出来是什么数据
+        // console.log(tokenData); // { id: '61c477b6c9f28a47eaa12a63', iat: 1640327777 } 
+        
+        // 【服务端登录校验jwt】 8.解构赋值出来后，我们可以通过id去找到用户,防止伪造信息或者有别的什么问题
+        // const user = await AdminUser.findById(id)  // 找到之后，user就是那个用户
+
+        // 【服务端登录校验jwt】 9.如果在后续的请求里，现在只是在中间件里能用这个user对象，
+        // 但是想在后面的接口 / 处理函数也能用的话，我们就把它挂载到req/res对象上去，表示客户端请求时的用户对象是谁
+        req.user = await AdminUser.findById(id)
+
+        // 【服务端登录校验jwt】 10. 看看是不是我们数据库里的用户
+        // console.log(req.user); // 输出的信息里有id、username，说明没有问题
+            
+        await next()
+    } , async (req, res) => {
         // 2.限制10条数据 当然不限制也可以，我们暂时先限制一下
         // 【子分类】 populate里放关联的字段，我们可以通过这个字段把它查出来
         // 我们要的parent并不是id,而是一个完整的信息，并把它变成对象
@@ -55,6 +116,8 @@ module.exports = app => {
         const items = await req.Model.find().setOptions(queryOptions).limit(10)
         res.send(items) //直接把数据发回给前端
     })
+
+    // 资源详情
     // 1.获取详情页的分类接口
     router.get('/:id', async (req, res) => {
         const model = await req.Model.findById(req.params.id)
@@ -117,7 +180,7 @@ module.exports = app => {
 
         // 4.1 根据用户名找用户
         // 那我们需要用到用户的模型，把用户的模型引用进来
-        const AdminUser = require('../../models/AdminUser')
+        // const AdminUser = require('../../models/AdminUser') // 暂时把AdminUser放到最顶上去
         // 下面是username: username键值对简写的方式，它们两正好一致，我们就可以写成简写方式。
         const user = await AdminUser.findOne({username}).select('+password') //这里加上select的意思是把password取出来，因为默认是不取它的，我们要用加号，要取它
         
@@ -144,7 +207,7 @@ module.exports = app => {
 
         // 4.3 返回token
         // 返回token，我们需要用到一个jsonwebtoken，在服务端里进行安装。这个是现在比较流行的，做web token验证的
-        const jwt = require('jsonwebtoken')
+        // const jwt = require('jsonwebtoken') // 【服务端校验密码(jwt)】 放到前面去引用
         // 用sign(签名)来生成一个token。接收参数，第一个payload——你要放到token里的数据
         // （这个token不是简单的随机字符串，它是把一个数据拿来进行散列，最后生成一个字符串拿去给客户端使用）
         // 这里用一个对象比较好一点，我们只要保存用户的唯一id就够了，或者把用户的个人信息也保存进去，比如用户名是什么
